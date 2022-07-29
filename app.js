@@ -44,21 +44,16 @@ function addToDisplay(buttonContent) {
     display.textContent = currNum;
 }
 
+/// soft reset
 function clearDisplay() {
-    // if prevResult == null, set firstNum = result
-    // clear secondNum
-    // clear currOperator
-    // clearDisplay & updateDisplay w/ prevResult
-
     firstNum = prevResult;
-
     secondNum = null;
     currOperator = null;
-    currNum = "";
     addToDisplay(prevResult);
+    currNum = "";
 }
 
-// should only be called by "C" button
+// hard reset
 function reset() {
     firstNum = null;
     secondNum = null;
@@ -69,20 +64,23 @@ function reset() {
 }
 
 function calculate() {
-    secondNum = currNum;
     operate(currOperator, firstNum, secondNum);
 }
 
 function onOperatorClick(op) {
-    if (firstNum == null) {
+    saveNumbers();
+    if (currOperator == null && firstNum != null && firstNum != "") currOperator = op;
+    if (firstNum && secondNum && currOperator) calculate();
+}
+
+function saveNumbers() {
+    if (firstNum == null || firstNum == "") {
         firstNum = currNum;
         currNum = "";
-    } else if (secondNum == null) {
-        calculate();
+    } else if (secondNum == null || secondNum == "") {
+        secondNum = currNum;
         currNum = "";
     }
-    if (currOperator == null) currOperator = op;
-    if (firstNum && secondNum && currOperator) calculate();
 }
 
 document.querySelectorAll(".number").
@@ -95,8 +93,9 @@ document.querySelectorAll(".operator").
     })
 
 document.querySelector(".clear").addEventListener("click", () => reset());
-document.querySelector(".equal").addEventListener("click", () => calculate());
-
-
+document.querySelector(".equal").addEventListener("click", (e) => {
+    saveNumbers();
+    calculate();
+});
 
 
