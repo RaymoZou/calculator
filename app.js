@@ -1,9 +1,10 @@
 const display = document.querySelector(".display");
 display.innerHTML = "&nbsp;"
 var currNum = "";
-var firstOp;
-var secondOp;
-var operator;
+var firstNum = null;
+var secondNum = null;
+var prevResult = null;
+var currOperator = null;
 
 function add(a, b) {
     return a + b;
@@ -21,57 +22,79 @@ function divide(a, b) {
 function operate(operation, a, b) {
     a = parseInt(a);
     b = parseInt(b);
-    var result; 
     switch (operation) {
         case "+":
-            result = add(a, b);
+            prevResult = add(a, b);
             break;
         case "-":
-            result = subtract(a, b);
+            prevResult = subtract(a, b);
             break;
         case "*":
-            result = multiply(a, b);
+            prevResult = multiply(a, b);
             break;
         case "/":
-            result = divide(a, b);
+            prevResult = divide(a, b);
             break;
     }
     clearDisplay();
-    updateDisplay(result);
 }
 
-function updateDisplay(buttonContent) {
+function addToDisplay(buttonContent) {
     currNum += buttonContent;
     display.textContent = currNum;
 }
 
 function clearDisplay() {
+    // if prevResult == null, set firstNum = result
+    // clear secondNum
+    // clear currOperator
+    // clearDisplay & updateDisplay w/ prevResult
+
+    firstNum = prevResult;
+
+    secondNum = null;
+    currOperator = null;
     currNum = "";
-    display.textContent = currNum;
-    display.innerHTML = "&nbsp;"
+    addToDisplay(prevResult);
+}
+
+// should only be called by "C" button
+function reset() {
+    firstNum = null;
+    secondNum = null;
+    currOperator = null;
+    prevResult = null;
+    currNum = "";
+    display.innerHTML = "&nbsp";
 }
 
 function calculate() {
-    secondOp = currNum;
-    operate(operator, firstOp, secondOp);
+    secondNum = currNum;
+    operate(currOperator, firstNum, secondNum);
 }
 
-function saveFirstOp(op) {
-    operator = op;
-    firstOp = currNum;
-    currNum = "";
+function onOperatorClick(op) {
+    if (firstNum == null) {
+        firstNum = currNum;
+        currNum = "";
+    } else if (secondNum == null) {
+        calculate();
+        currNum = "";
+    }
+    if (currOperator == null) currOperator = op;
+    if (firstNum && secondNum && currOperator) calculate();
 }
 
 document.querySelectorAll(".number").
     forEach(button => {
-        button.addEventListener("click", () => updateDisplay(button.textContent));
+        button.addEventListener("click", () => addToDisplay(button.textContent));
     })
 document.querySelectorAll(".operator").
     forEach(button => {
-        button.addEventListener("click", () => saveFirstOp(button.textContent));
+        button.addEventListener("click", () => onOperatorClick(button.textContent));
     })
 
-document.querySelector(".clear").addEventListener("click", () => clearDisplay());
+document.querySelector(".clear").addEventListener("click", () => reset());
 document.querySelector(".equal").addEventListener("click", () => calculate());
 
 
